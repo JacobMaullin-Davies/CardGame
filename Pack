@@ -1,0 +1,86 @@
+import java.io.*;
+import java.util.Random;
+import java.util.Scanner;
+import java.io.File;  // Import the File class
+import java.io.FileNotFoundException;  // Import this class to handle errors
+
+public class Pack {
+    public String packname;
+    public Card[] GameDeck;
+
+
+
+    public Card[] shuffleArray(int n) {
+        int cardNum = 8 * n;
+        int decknum = 2 * n;
+        Card[] packArray = new Card[cardNum];
+        int arraySection = 0;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 1; j < decknum + 1; j++) {
+                packArray[arraySection] = new Card(j);
+                arraySection++;
+            }
+        }
+        for (int i = 0; i < packArray.length; i++) {
+            System.out.println(packArray[i].getIndexValue());
+        }
+        Random rand = new Random();
+        for (int i = 0; i < packArray.length; i++) {
+            int randomIndexToSwap = rand.nextInt(packArray.length);
+            Card temp = packArray[randomIndexToSwap];
+            packArray[randomIndexToSwap] = packArray[i];
+            packArray[i] = temp;
+        }
+        return packArray;
+    }
+
+    public void fileCheck(String fileName, int PlayerCount) throws IOException {
+        packname = fileName;
+        File myObj = new File(fileName + ".txt");
+        if (myObj.exists()) {
+            System.out.println("File found");
+            readPack(fileName);
+        } else {
+            System.out.println("File created: " + myObj.getName());
+            writePack(PlayerCount);
+        }
+    }
+
+    public void writePack(int n) throws IOException {
+        try {
+            FileWriter writePack = new FileWriter(packname + ".txt");
+            BufferedWriter bw = new BufferedWriter(writePack);
+            Card[] pack = shuffleArray(n);
+            for (int i = 0; i < pack.length; i++) {
+                int a = pack[i].getIndexValue();
+                bw.write(String.valueOf(a));
+                bw.newLine();
+            }
+            bw.close();
+            writePack.close();
+
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public void readPack(String filenameRead) {
+        try {
+            File packFile = new File(filenameRead + ".txt");
+            BufferedReader br = new BufferedReader(new FileReader(packFile));
+            String st;
+            int count = 0;
+            while ((st = br.readLine()) != null) {
+                GameDeck[count] = new Card(Integer.parseInt(st));
+                System.out.println(st);
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+}

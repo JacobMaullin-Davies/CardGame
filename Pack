@@ -7,8 +7,24 @@ import java.io.FileNotFoundException;  // Import this class to handle errors
 public class Pack {
     public String packname;
     public Card[] GameDeck;
+    public Integer playerNum;
 
+    public Pack(String filename, int playerNumber) {
+        this.packname = filename;
+        this.playerNum = playerNumber;
+        this.GameDeck = new Card[playerNum*8];
+    }
 
+    public void fileCheck(String fileName, int playerCount) throws IOException {
+        File myObj = new File(fileName + ".txt");
+        if (myObj.exists()) {
+            System.out.println("File found");
+            readPack(fileName);
+        } else {
+            System.out.println("File created: " + myObj.getName());
+            writePack(playerCount);
+        }
+    }
 
     public Card[] shuffleArray(int n) {
         int cardNum = 8 * n;
@@ -34,17 +50,6 @@ public class Pack {
         return packArray;
     }
 
-    public void fileCheck(String fileName, int PlayerCount) throws IOException {
-        packname = fileName;
-        File myObj = new File(fileName + ".txt");
-        if (myObj.exists()) {
-            System.out.println("File found");
-            readPack(fileName);
-        } else {
-            System.out.println("File created: " + myObj.getName());
-            writePack(PlayerCount);
-        }
-    }
 
     public void writePack(int n) throws IOException {
         try {
@@ -74,13 +79,18 @@ public class Pack {
             int count = 0;
             while ((st = br.readLine()) != null) {
                 GameDeck[count] = new Card(Integer.parseInt(st));
-                System.out.println(st);
+                count++;
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
 
         }
-    }
+        for (int i = 0; i < GameDeck.length; i++) {
+            System.out.print(GameDeck[i].getIndexValue());
+            System.out.print(",");
+        }
+
+
+        }
 }
+

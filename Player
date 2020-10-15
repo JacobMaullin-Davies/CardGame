@@ -1,0 +1,23 @@
+public class Player {
+    private int playerNumber;    //the number of this BeanBag Object
+    private Card[] playerHandArray;
+    private Card[] playerDeckArray;
+
+    public Player(int PlayerNumber, Object PlayerHandArray, Object PlayerDeckArray) { //parse the deck num through
+        this.playerNumber = PlayerNumber;
+        this.playerHandArray = new Card[3]; //0 to 4 where 4 is the add and remove hand
+        this.playerDeckArray = new Card[8]; ///need to resize for the deck number
+    }
+
+    int getPlayerNumber() { //get the BeanBag's number of items
+        return playerNumber;
+    }
+
+    public Card[] getPlayerHandArray() {
+        return playerHandArray;
+    }
+
+    public Card[] getPlayerDeckArray() {
+        return playerDeckArray;
+    }
+}

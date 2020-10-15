@@ -1,0 +1,12 @@
+public class Card {
+    private int indexValue;
+
+    public Card(int indexValue){
+        this.indexValue = indexValue;
+
+    }
+
+    public int getIndexValue(){
+        return indexValue;
+    }
+}

@@ -10,7 +10,10 @@ public class CardGame {
         Scanner packFile = new Scanner(System.in);
         System.out.println("Please enter pack location to load: ");
         String fileObj = packFile.nextLine();  // Read user input
-        Pack pack = new Pack();
+        Pack pack = new Pack(fileObj, PlayerCount);
         pack.fileCheck(fileObj, PlayerCount);
+        Game game = new Game(PlayerCount);
+        game.handOutCards();
+
     }
 }

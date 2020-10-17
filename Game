@@ -1,0 +1,53 @@
+import java.time.Clock;
+
+public class Game {
+    private int playerAmount;
+    private Player[] playerArray;
+
+    public Game(int playerAmount){
+        this.playerAmount = playerAmount;
+        this.playerArray = new Player[playerAmount];
+        for (int i = 0; i < playerAmount; i++){
+            playerArray[i] = new Player(i, (2*playerAmount-4));
+        }
+    }
+
+    public Player[] getPlayerArray() {
+        return playerArray;
+    }
+
+    public void handOutCards() {
+        Card[] allCards = Pack.getGameDeck();
+        Player[] allPlayers = getPlayerArray();
+        int count = 0;
+        int tally = 0;
+        int deckSize = 2*playerAmount-4;
+        for (int arraySection = 0; arraySection < 4; arraySection++){
+            for (int eachPlayer = 0; eachPlayer < playerAmount; eachPlayer++){
+                Card[] thisPlayerHand = allPlayers[eachPlayer].getPlayerHandArray();
+                thisPlayerHand[arraySection] = allCards[count];
+                count++;
+                tally++;
+            }
+        }
+
+        for (int arraySection = 0; arraySection < deckSize; arraySection++){
+            for (int eachPlayer = 0; eachPlayer < playerAmount; eachPlayer++){
+                Card[] thisPlayerDeck = allPlayers[eachPlayer].getPlayerDeckArray();
+                thisPlayerDeck[arraySection] = allCards[tally];
+                tally++;
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            Card[] playerHand = playerArray[1].getPlayerHandArray();
+            System.out.println(playerHand[i].getIndexValue());
+
+        }
+        System.out.println("Deck");
+        for (int i = 0; i < 2*playerAmount-4; i++) {
+            Card[] playerDeck = playerArray[1].getPlayerDeckArray();
+            System.out.println(playerDeck[i].getIndexValue());
+        }
+    }
+}

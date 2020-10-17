@@ -2,14 +2,13 @@ import java.io.*;
 import java.util.Random;
 import java.io.File;  // Import the File class
 
-
 public class Pack {
-    public String packname;
-    public Card[] GameDeck;
+    private static Card[] GameDeck;
+    public String packName;
     public Integer playerNum;
 
     public Pack(String filename, int playerNumber) {
-        this.packname = filename;
+        this.packName = filename;
         this.playerNum = playerNumber;
         this.GameDeck = new Card[playerNum*8];
     }
@@ -52,7 +51,7 @@ public class Pack {
 
     public void writePack(int n) throws IOException {
         try {
-            FileWriter writePack = new FileWriter(packname + ".txt");
+            FileWriter writePack = new FileWriter(packName + ".txt");
             BufferedWriter bw = new BufferedWriter(writePack);
             Card[] pack = shuffleArray(n);
             for (int i = 0; i < pack.length; i++) {
@@ -88,8 +87,12 @@ public class Pack {
             System.out.print(GameDeck[i].getIndexValue());
             System.out.print(",");
         }
+        System.out.println("");
 
+    }
 
-        }
+    public static Card[] getGameDeck() {
+        return GameDeck;
+    }
 }
 

@@ -1,12 +1,17 @@
 public class Card {
-    private int indexValue;
+    private final int indexValue;
+    //Attribute stores the amount of rounds a card has been held for
+    private int timeStep;
 
     public Card(int indexValue){
         this.indexValue = indexValue;
-
+        this.timeStep = 0;
     }
-
     public int getIndexValue(){
         return indexValue;
     }
+
+    public int getTimeStep(){ return timeStep;}
+
+    public void setTimeStep(){ timeStep +=1; }
 }

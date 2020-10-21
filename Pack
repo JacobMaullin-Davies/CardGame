@@ -61,7 +61,6 @@ public class Pack {
             }
             bw.close();
             writePack.close();
-
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -85,6 +84,7 @@ public class Pack {
         }
         for (int i = 0; i < GameDeck.length; i++) {
             System.out.print(GameDeck[i].getIndexValue());
+            //shuffle array as well
             System.out.print(",");
         }
         System.out.println("");

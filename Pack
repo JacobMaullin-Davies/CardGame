@@ -24,20 +24,8 @@ public class Pack {
         }
     }
 
-    public Card[] shuffleArray(int n) {
-        int cardNum = 8 * n;
-        int decknum = 2 * n;
-        Card[] packArray = new Card[cardNum];
-        int arraySection = 0;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 1; j < decknum + 1; j++) {
-                packArray[arraySection] = new Card(j);
-                arraySection++;
-            }
-        }
-        for (int i = 0; i < packArray.length; i++) {
-            System.out.println(packArray[i].getIndexValue());
-        }
+    public Card[] shuffleArray(Card[] packArray) {
+
         Random rand = new Random();
         for (int i = 0; i < packArray.length; i++) {
             int randomIndexToSwap = rand.nextInt(packArray.length);
@@ -49,11 +37,23 @@ public class Pack {
     }
 
 
+
     public void writePack(int n) throws IOException {
+        int cardNum = 8 * n;
+        int deckNum = 2 * n;
+        Card[] packArray = new Card[cardNum];
+        int arraySection = 0;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 1; j < deckNum + 1; j++) {
+                packArray[arraySection] = new Card(j);
+                arraySection++;
+            }
+        }
         try {
             FileWriter writePack = new FileWriter(packName + ".txt");
             BufferedWriter bw = new BufferedWriter(writePack);
-            Card[] pack = shuffleArray(n);
+
+            Card[] pack = shuffleArray(packArray);
             for (int i = 0; i < pack.length; i++) {
                 int a = pack[i].getIndexValue();
                 bw.write(String.valueOf(a));
@@ -82,13 +82,13 @@ public class Pack {
             e.printStackTrace();
 
         }
+        GameDeck = shuffleArray(GameDeck);
         for (int i = 0; i < GameDeck.length; i++) {
             System.out.print(GameDeck[i].getIndexValue());
-            //shuffle array as well
+
             System.out.print(",");
         }
         System.out.println("");
-
     }
 
     public static Card[] getGameDeck() {

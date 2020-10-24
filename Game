@@ -1,8 +1,12 @@
+import java.util.ArrayList;
+
 public class Game {
     private int playerAmount;
     private Player[] playerArray;
+    private boolean win;
 
     public Game(int playerAmount){
+        this.win = false;
         this.playerAmount = playerAmount;
         this.playerArray = new Player[playerAmount];
         int count = 1;
@@ -39,22 +43,25 @@ public class Game {
             }
         }
 
-        for (int k = 0; k < 4; k++) {
-            System.out.println("Player: " + playerArray[k].getPlayerNumber());
-            Card[] playerHand = playerArray[k].getPlayerHandArray();
-            Card[] playerDeck = playerArray[k].getPlayerDeckArray();
-            System.out.println("Player Hand: ");
-            for (int j = 0; j < 4; j++) {
-                System.out.print(playerHand[j].getIndexValue() + " ");
-            }
-            System.out.println("");
-            System.out.println("Player Deck: ");
-            for (int i = 0; i < 2 * playerAmount - 4; i++) {
-                System.out.print(playerDeck[i].getIndexValue() + " ");
-            }
-            System.out.println("");
-        }
+
     }
+    public void outFunction(int playerNumber){
+        System.out.println("Player: " + playerNumber);
+        Card[] playerHand = searchPlayer(playerNumber).getPlayerHandArray();
+        Card[] playerDeck = searchPlayer(playerNumber).getPlayerDeckArray();
+        System.out.println("Player Hand: ");
+        for (int j = 0; j < 4; j++) {
+            System.out.print(playerHand[j].getIndexValue() + " ");
+        }
+        System.out.println("");
+        System.out.println("Player Deck: ");
+        for (int i = 0; i < playerDeck.length; i++) {
+            System.out.print(playerDeck[i].getIndexValue() + " ");
+        }
+        System.out.println("");
+
+    }
+
     public Player searchPlayer(int playerNumber){
         Player interestedPlayer = null;
         for (int everyPlayer = 0; everyPlayer < playerAmount; everyPlayer++){
@@ -75,29 +82,78 @@ public class Game {
         return specificDeck;
     }
 
+    public void turn(int playerNumber, int indexHand){
+        int playerPickUp = playerNumber - 1;
+        int playerDiscardDeck = playerNumber + 1;
+        if(playerPickUp == 0){
+            playerPickUp = playerAmount;
+        }
+        if(playerDiscardDeck > playerAmount){
+            playerDiscardDeck = 1;
+        }
+        Card[] hand = getPlayerGameHand(playerNumber);
+        Card[] deckPickUp = getPlayerGameDeck(playerPickUp);
+        Card[] deckDiscard = getPlayerGameDeck(playerDiscardDeck);
+        ArrayList listUp = new ArrayList();
+        ArrayList listDown = new ArrayList();
+
+
+        Card cardUp = deckPickUp[0];
+        deckPickUp[0] = null;
+        for (int i = 0; i < deckPickUp.length; i++) {
+            if(deckPickUp[i] == null){
+                continue;
+            }else{
+                listUp.add(deckPickUp[i]);
+            }
+        }
+        Card[] newPickupDeck = new Card[listUp.size()];
+        newPickupDeck = (Card[]) listUp.toArray(newPickupDeck);
+
+        Card toDiscard = hand[indexHand];
+        hand[indexHand] = cardUp;
+
+        for (int i = 0; i < deckDiscard.length; i++) {
+            listDown.add(deckDiscard[i]);
+        }
+        listDown.add(toDiscard);
+
+        Card[] newDiscardDeck = new Card[listDown.size()];
+        newDiscardDeck = (Card[]) listDown.toArray(newDiscardDeck);
+
+        searchPlayer(playerPickUp).newDeck(newPickupDeck);
+        searchPlayer(playerDiscardDeck).newDeck(newDiscardDeck);
+
+        System.out.println("Player " + playerNumber + "Picked up " + cardUp.getIndexValue()
+                + " from player " + playerPickUp +" and discarded " + toDiscard.getIndexValue() + " to player " + playerDiscardDeck);
+    }
+
     //Following code checks each player to see if there is a winner
     public void checkForWin(int playerNumber) {
         //Search for player with that playerNumber
+        int indexHand;
         boolean winCheck = searchPlayer(playerNumber).checkWin();
         if (winCheck == true) {
             System.out.println("The player that has won is: " + playerNumber);
-            //end game function call
+            win = true;
         }
-        searchPlayer(playerNumber).discard();
+        if(searchPlayer(playerNumber).isCardPlayerNumber() == true) {
+            System.out.println();
+        }
+        else {
+            searchPlayer(playerNumber).discard();
+        }
+        indexHand = searchPlayer(playerNumber).findIndex();
+        turn(playerNumber, indexHand);
+    }
+
+    public boolean won() {
+        if(win == true){
+            return true;
+        }
+        return false;
     }
 }
 
 
 
-//for (int everyPlayer = 0; everyPlayer < playerAmount; everyPlayer++) {
-//            boolean winCheck = playerArray[everyPlayer].checkWin();
-//            System.out.println(winCheck);
-//            if (winCheck == true) {
-//                System.out.println(playerArray[everyPlayer].getPlayerNumber() + "Has won");
-//                //thread inform that player has won
-//            }
-//        }
-
-//player	1 draws	a	4	from	deck	1
-//        player	1 discards	a	3	to	deck	2
-//        player	1 current	hand	is	1	1	2	4

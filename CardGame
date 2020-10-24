@@ -14,11 +14,12 @@ public class CardGame {
         pack.fileCheck(fileObj, PlayerCount);
         Game game = new Game(PlayerCount);
         game.handOutCards();
-        for (int i = 1; i < PlayerCount+1; i++) {
-            game.checkForWin(i);
+        while (game.won() == false) {
+            for (int i = 1; i < PlayerCount + 1; i++) {
+                game.checkForWin(i);
+                game.outFunction(i);
+            }
         }
-       // game.checkForWin(1);
-
-        //while loop from 1 to n will go through each player, and accordingly check win, if not won then change number in deck
     }
 }
+

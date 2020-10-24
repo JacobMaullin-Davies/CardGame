@@ -9,6 +9,7 @@ public class Card {
         this.timeStep = 0;
         this.discard = false;
     }
+
     public int getIndexValue(){
         return indexValue;
     }

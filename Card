@@ -1,3 +1,5 @@
+package jacobVersion;
+
 public class Card {
     private final int indexValue;
     //Attribute stores the amount of rounds a card has been held for
@@ -9,18 +11,33 @@ public class Card {
         this.timeStep = 0;
         this.discard = false;
     }
-
     public int getIndexValue(){
         return indexValue;
     }
 
-    public int getTimeStep(){ return timeStep;}
+    public int getTimeStep(){
+    	return timeStep;
+    }
+    
+    //Resets so card age is 0 and set to keep (reset cards)
+    public void reset() {
+    	timeStep = 0;
+    	discard = false;
+    }
 
-    public void setTimeStep(){ timeStep +=1; }
+    public void setTimeStep(){
+    	timeStep +=1;
+    }
 
-    public void setToDiscard() { discard = true; }
+    public void setToDiscard() { 
+    	discard = true;
+    }
 
-    public void setToKeep() { discard = false; }
+    public void setToKeep() { 
+    	discard = false; 
+    }
 
-    public boolean getDiscard() { return discard; }
+    public boolean getDiscard() { 
+    	return discard; 
+    }
 }

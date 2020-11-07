@@ -3,22 +3,20 @@ import java.util.Scanner;
 
 public class CardGame {
     public static void main(String[] args) throws IOException {
-        Scanner PlayerNum = new Scanner(System.in);  // Create a Scanner object
-        System.out.println("Please enter the number of players: ");
-        int PlayerCount = PlayerNum.nextInt();  // Read user input
-        System.out.println("Confirmed players = " + PlayerCount);  // Output user input
-        Scanner packFile = new Scanner(System.in);
-        System.out.println("Please enter pack location to load: ");
-        String fileObj = packFile.nextLine();  // Read user input
-        Pack pack = new Pack(fileObj, PlayerCount);
-        pack.fileCheck(fileObj, PlayerCount);
-        Game game = new Game(PlayerCount);
-        game.handOutCards();
-        for (int i = 1; i < PlayerCount+1; i++) {
-            game.checkForWin(i);
-        }
-       // game.checkForWin(1);
-
-        //while loop from 1 to n will go through each player, and accordingly check win, if not won then change number in deck
+            Scanner PlayerNum = new Scanner(System.in);  // Create a Scanner object
+            System.out.println("Please enter the number of players: ");
+            int PlayerCount = PlayerNum.nextInt();  // Read user input
+            System.out.println("Confirmed players = " + PlayerCount);  // Output user input
+            Scanner packFile = new Scanner(System.in);
+            System.out.println("Please enter pack location to load: ");
+            String fileObj = packFile.nextLine();  // Read user input
+            Pack pack = new Pack(fileObj, PlayerCount);
+            try {
+                pack.fileCheck(fileObj, PlayerCount);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Game game = new Game(PlayerCount);
+            game.start();
     }
 }

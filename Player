@@ -1,10 +1,14 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
-public class Player {
+public class Player extends Thread{
     private int playerNumber;
     private int deckNum;
     private Card[] playerHandArray;
     private Card[] playerDeckArray;
+    private Card[] pickDeck;
+    private Card[] discardDeck;
 
     public Player(int PlayerNumber, int deckNum) { //parse the deck num through
         this.playerNumber = PlayerNumber;
@@ -12,27 +16,8 @@ public class Player {
         this.playerHandArray = new Card[4]; //0 to 4 where 4 is the add/remove hand
         this.playerDeckArray = new Card[deckNum];
     }
-    //Following code checks if a player has won
-    public boolean checkWin() {
-        boolean playerWin = true;
-        //Gathers together card values
-        int[] cardNumbers = new int[4];
-        for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
-            cardNumbers[eachCard] = playerHandArray[eachCard].getIndexValue();
-        }
 
-        //Checking if the card values are the same
-        int comparisonValue = cardNumbers[0];
-        for (int eachValue = 1; eachValue < cardNumbers.length; eachValue++) {
-            if (comparisonValue != cardNumbers[eachValue]) {
-                playerWin = false;
-                break;
-            }
-        }
-        return playerWin;
-    }
-
-    public  int getPlayerNumber() {
+    public int getPlayerNumber() {
         return playerNumber;
     }
 
@@ -48,104 +33,181 @@ public class Player {
         return playerDeckArray;
     }
 
-    public void discard(){
+    public Card[] getPickDeck() {
+        return discardDeck;
+    }
+
+    public void setPickDeck(Card[] pickDeck){
+        this.pickDeck = pickDeck;
+    }
+    public void setDiscardDeck(Card[] discardDeck){
+        this.discardDeck = discardDeck;
+    }
+
+    public void newDeck(Card[] newPickupDeck){
+        this.playerDeckArray = newPickupDeck;
+    }
+    //This resets the hand so each card discard attribute is set to false
+    public void resetHand() {
+        for (int i = 0; i < playerHandArray.length; i++) {
+            playerHandArray[i].setToKeep();
+        }
+    }
+    public void resetDeck() {
+        for(int i = 0; i < playerDeckArray.length; i++) {
+            playerDeckArray[i].reset();
+        }
+    }
+
+    public void incrementTimeStep() {
+        for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
+            Card currentCard = playerHandArray[eachCard];
+            currentCard.setTimeStep();
+        }
+    }
+
+    public void turn(int index){
+        resetHand();
+        resetDeck();
+        Card cardToDiscard = playerHandArray[index];
+
+    }
+
+    //Following code checks if a player has won
+    public boolean checkWin() {
+    //Gathers together card values
+        int[] cardNumbers = new int[4];
+        for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
+            cardNumbers[eachCard] = playerHandArray[eachCard].getIndexValue();
+        }
+
+        //Checking if the card values are the same
+        int comparisonValue = cardNumbers[0];
+        for (int eachValue = 1; eachValue < cardNumbers.length; eachValue++) {
+            if (comparisonValue != cardNumbers[eachValue]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+    //Searches the hand of the player to find a certain card number
+    public boolean searchCardNumber(int cardNumber) {
+        for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
+            int currentCardNum = playerHandArray[eachCard].getIndexValue();
+            if (currentCardNum == cardNumber) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //Finds card where the index is the player number and changes discard attribute
+    public void decideKeep() {
+        if (searchCardNumber(playerNumber) == true) {
+            for (int g = 0; g < playerHandArray.length; g++) {
+                int currentCardNum = playerHandArray[g].getIndexValue();
+                if (currentCardNum == playerNumber) {
+                    playerHandArray[g].setToKeep();
+                } else {
+                    playerHandArray[g].setToDiscard();
+                }
+            }
+        }
+    }
+
+
+
+    public void decideDiscard(){
         Card[] playerHandArray = getPlayerHandArray();
         int[] tempArray = new int[4];
-        Card [] keepArray = new Card[4];
-        Card [] discardArray = new Card[4];
         for (int i = 0; i < playerHandArray.length; i++) {
             tempArray[i] = playerHandArray[i].getIndexValue();
         }
         Arrays.sort(tempArray);
-        int moreVal = 1;
+
+        int cardNumAmount = 1;
         int tempValue;
         int winingVal = tempArray[0];
+        int count = 0;
         for (int i = 0; i < (tempArray.length); i++) {
-            int count = 1;
+            count = 1;
             tempValue = tempArray[i];
-            System.out.println("We have: " + tempValue);
+
             for (int j = i+1; j < tempArray.length; j++) {
                 int againstVal = tempArray[j];
                 if (tempValue == againstVal) {
                     count++;
-                    System.out.println("Another found" + againstVal);
                 }
-            }if(count > moreVal){
+            }if(count > cardNumAmount) {
                 winingVal = playerHandArray[i].getIndexValue();
-                moreVal = count;
+                cardNumAmount = count;
             }
-
 
         }
 
+        if(cardNumAmount > 1 ) {
+            for (int i = 0; i < playerHandArray.length; i++) {
+                if (winingVal == playerHandArray[i].getIndexValue()) {
+                    playerHandArray[i].setToKeep();
+                } else {
+                    playerHandArray[i].setToDiscard();
+                }
+            }
+        }
+        else{
+            for (int i = 0; i < playerHandArray.length; i++) {
+                playerHandArray[i].setToDiscard();
+            }
+        }
     }
 
-    public void discardCard(){
-        //Find card numbers that doesnt repeat
-        Card[] playerCards = getPlayerHandArray();
-        int count = 0;
-        Card[] nonRepeatingCards = new Card[4];
-        for (int i = 0; i < 4; i++){
-            int j;
-            for (j = 0; j < 4; j++){
-                int firstValue = playerCards[i].getIndexValue();
-                int secondValue = playerCards[i].getIndexValue();
-                if(i != j && firstValue == secondValue){
-                    break;
-                }
-            }
-            if (j == 4){
-                nonRepeatingCards[count] = playerCards[i];
-                count++;
-            }
-        }
-        if(nonRepeatingCards == null) {
-            int thisValue = 0;
-            int playerNum = playerNumber;
-            for (int i = 0; i < playerHandArray.length; i++) {
-                if (playerNum == playerHandArray[i].getIndexValue()) {
-                    thisValue = playerHandArray[i].getIndexValue();
+
+
+    //Returns index to which card should be removed from the players hand array
+    public int findDiscardIndex(){
+        ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
+        ArrayList<Integer> removePriorityIndex = new ArrayList<Integer>();
+        for (int i = 0; i < playerHandArray.length; i++) {
+            if(playerHandArray[i].getDiscard() == true){
+                if(playerHandArray[i].getTimeStep() > 2){ /// 3 ?
+                    removePriorityIndex.add(i);
+                }else {
+                    removeIndexes.add(i);
                 }
             }
         }
-
-        //Out of those cards pick card that has highest time step
-        Card currentMax = nonRepeatingCards[0];
-        for (int eachCard = 1; eachCard < 4; eachCard++){
-            int thisTimeStep = nonRepeatingCards[eachCard].getTimeStep();
-            if(thisTimeStep > currentMax.getIndexValue()){
-                currentMax = nonRepeatingCards[eachCard];
+        Random rand = new Random();
+        int randomIndexToRemove = 0;
+        int index = 0;
+        int removePosition = 0;
+        if(removePriorityIndex.size() > 0){
+            randomIndexToRemove = rand.nextInt(removePriorityIndex.size());
+            index = removePriorityIndex.get(randomIndexToRemove);
+            removePosition = removePriorityIndex.indexOf(index);
+            removePriorityIndex.remove(removePosition);
+            for(int j = 0; j < removePriorityIndex.size(); j++) {
+                for(int i = 0; i < playerHandArray.length; i++) {
+                    if(removePriorityIndex.get(j) == i) {
+                        playerHandArray[i].setTimeStep();
+                    }
+                }
+            }
+        }else {
+            randomIndexToRemove = rand.nextInt(removeIndexes.size());
+            index = removeIndexes.get(randomIndexToRemove);
+            removePosition = removeIndexes.indexOf(index);
+            removeIndexes.remove(removePosition);
+            for(int j = 0; j < removeIndexes.size(); j++) {
+                for(int i = 0; i < playerHandArray.length; i++) {
+                    if(removeIndexes.get(j) == i) {
+                        playerHandArray[i].setTimeStep();
+                    }
+                }
             }
         }
-
-        //Removing Card
-
+        return index;
     }
 
 }
-// for (int i = 0; i < 4; i++) {
-//            Card[] playerHand = playerArray[].getPlayerHandArray();
-//            System.out.println(playerHand[i].getIndexValue());
-//
-//        }
-//        System.out.println("Deck");
-//        for (int i = 0; i < 2*playerAmount-4; i++) {
-//            Card[] playerDeck = playerArray[1].getPlayerDeckArray();
-//            System.out.println(playerDeck[i].getIndexValue());
-//        }
-//int thisDifference = 0;
-//            Card possibleHighest = playerHandArray[0];
-//            int currentHighestDifference = playerNumber - playerHandArray[0].getIndexValue();
-//            for (int q = 0; q <playerHandArray.length; q++) {
-//                int thisValue= playerHandArray[q].getIndexValue();
-//                if(thisValue <= playerNumber){
-//                    thisDifference = playerNumber - thisValue;
-//                }
-//                else{
-//                    thisDifference = thisValue = playerNumber;
-//                }
-//                if (thisDifference > currentHighestDifference){
-//                    possibleHighest = playerHandArray[q];
-//                }
-//            }
-//        }

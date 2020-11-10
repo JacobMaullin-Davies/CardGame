@@ -1,0 +1,34 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Deck {
+    private int playerDeckNumber;
+    private Queue<Card> playerDeckArray;
+
+    public Deck(int playerNumber){
+        this.playerDeckNumber = playerNumber;
+        this.playerDeckArray = new LinkedList();
+
+    }
+    public Queue<Card> getDeck(){
+        return playerDeckArray;
+    }
+
+    public void add(Card e){
+        playerDeckArray.add(e);
+
+    }
+    public Card pickup(){
+        Card a = playerDeckArray.remove();
+        return a;
+    }
+
+    public void discard(Card discardCard) {
+        playerDeckArray.add(discardCard);
+    }
+
+    public int removeFirst() {
+        return playerDeckArray.remove().getIndexValue();
+    }
+}
+

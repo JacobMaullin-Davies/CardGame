@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class CardGame {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws InterruptedException, IOException {
             Scanner PlayerNum = new Scanner(System.in);  // Create a Scanner object
             System.out.println("Please enter the number of players: ");
             int PlayerCount = PlayerNum.nextInt();  // Read user input
@@ -17,6 +17,6 @@ public class CardGame {
                 e.printStackTrace();
             }
             Game game = new Game(PlayerCount);
-            game.start();
+            game.play();
     }
 }

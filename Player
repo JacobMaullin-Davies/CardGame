@@ -1,80 +1,136 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public class Player extends Thread{
+public class Player implements Runnable{
+    private Thread t;
+    private String threadName;
     private int playerNumber;
-    private int deckNum;
     private Card[] playerHandArray;
-    private Card[] playerDeckArray;
-    private Card[] pickDeck;
-    private Card[] discardDeck;
+    private Deck pickDeck;
+    private Deck discardDeck;
+    private int playerAmount;
+    private Game game;
+    private boolean hasWon;
 
-    public Player(int PlayerNumber, int deckNum) { //parse the deck num through
+    public Player(int PlayerNumber, int playerAmount, Game game) throws IOException { //parse the deck num through
+        this.game = game;
         this.playerNumber = PlayerNumber;
-        this.deckNum = deckNum;
         this.playerHandArray = new Card[4]; //0 to 4 where 4 is the add/remove hand
-        this.playerDeckArray = new Card[deckNum];
+        this.playerAmount = playerAmount;
+        this.hasWon = false;
+        this.threadName = String.valueOf(playerNumber);
+        fileCheckPlayer();
     }
+
+    public void fileCheckPlayer() throws IOException { Pack.playerFileCheck(playerNumber); }
+
+    public void setPickDeckForPlayer(Deck deck){ this.pickDeck = deck; }
+
+    public void setDiscardDeckForPlayer(Deck deck){ this.discardDeck = deck; }
 
     public int getPlayerNumber() {
         return playerNumber;
-    }
-
-    public int getDeckNum(){
-        return deckNum;
     }
 
     public Card[] getPlayerHandArray() {
         return playerHandArray;
     }
 
-    public Card[] getPlayerDeckArray() {
-        return playerDeckArray;
-    }
-
-    public Card[] getPickDeck() {
-        return discardDeck;
-    }
-
-    public void setPickDeck(Card[] pickDeck){
-        this.pickDeck = pickDeck;
-    }
-    public void setDiscardDeck(Card[] discardDeck){
-        this.discardDeck = discardDeck;
-    }
-
-    public void newDeck(Card[] newPickupDeck){
-        this.playerDeckArray = newPickupDeck;
-    }
     //This resets the hand so each card discard attribute is set to false
     public void resetHand() {
         for (int i = 0; i < playerHandArray.length; i++) {
             playerHandArray[i].setToKeep();
         }
     }
-    public void resetDeck() {
-        for(int i = 0; i < playerDeckArray.length; i++) {
-            playerDeckArray[i].reset();
+    public void stopThread() {
+        this.hasWon = true;
+        System.out.println("Player " + playerNumber + " exits game...") ;
+    }
+
+    public void start() {
+        if(t == null){
+            t = new Thread(this,threadName);
+        }
+        t.start();
+    }
+
+    @Override
+    public void run() {
+        synchronized (this) {
+            while (!hasWon) {
+                if (game.getDone()) {
+                    continue;
+                } else {
+                    Thread.interrupted();
+                }
+                boolean playerNumExist = searchCardNumber(playerNumber);
+                if (playerNumExist) {
+                    decideKeep();
+                } else {
+                    decideDiscard();
+                }
+                int indexHand = findDiscardIndex();
+                try {
+                    turn(indexHand);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (checkWin()) {
+                    System.out.println("Winner is: " + playerNumber);
+                    try {
+                        game.notifyEnd(playerNumber);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Pack.winnerWrite(playerNumber, playerHandArray);
+                }
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
-    public void incrementTimeStep() {
-        for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
-            Card currentCard = playerHandArray[eachCard];
-            currentCard.setTimeStep();
-        }
-    }
 
-    public void turn(int index){
+    public void turn(int index) throws IOException {
+
+        int playerPickUp = playerNumber - 1;
+        int playerDiscardDeck = playerNumber + 1;
+
+        if(playerPickUp <= 0){
+            playerPickUp = playerAmount;
+        }
+        if(playerDiscardDeck > playerAmount){
+            playerDiscardDeck = 1;
+        }
+
         resetHand();
-        resetDeck();
-        Card cardToDiscard = playerHandArray[index];
+        Card a = pickDeck.pickup();
+        Card discardCard = playerHandArray[index];
+        discardCard.resetCard();
+        playerHandArray[index] = a;
+        discardDeck.discard(discardCard);
+        Pack.writePlayers(playerNumber,
+                a.getIndexValue(),
+                playerPickUp,
+                discardCard.getIndexValue(),
+                playerDiscardDeck);
 
+        System.out.println("Player " + playerNumber + " picked up " + a.getIndexValue()
+                + " from player " + playerPickUp +" and discarded " + discardCard.getIndexValue()
+                + " to player " + playerDiscardDeck);
     }
 
-    //Following code checks if a player has won
-    public boolean checkWin() {
+    /**
+     * Returns a boolean after checking if all the values in the array are equal
+     *
+     * @return boolean value depending if items are equal
+     */
+    public boolean checkWin(){
     //Gathers together card values
         int[] cardNumbers = new int[4];
         for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
@@ -92,8 +148,12 @@ public class Player extends Thread{
     }
 
 
-
-    //Searches the hand of the player to find a certain card number
+    /**
+     * Checks the Players hand for numbers equal to the players' number as it is a priority card
+     *
+     * @param cardNumber    the players number to check
+     * @return              returns boolean
+     */
     public boolean searchCardNumber(int cardNumber) {
         for (int eachCard = 0; eachCard < playerHandArray.length; eachCard++) {
             int currentCardNum = playerHandArray[eachCard].getIndexValue();
@@ -103,9 +163,14 @@ public class Player extends Thread{
         }
         return false;
     }
-    //Finds card where the index is the player number and changes discard attribute
+
+    /**
+     * Finds card where the index is the player number and changes the cards attribute
+     * If the card is not the players number its attribute is set to true, as this is
+     * a card to be discarded
+     */
     public void decideKeep() {
-        if (searchCardNumber(playerNumber) == true) {
+        if (searchCardNumber(playerNumber)) {
             for (int g = 0; g < playerHandArray.length; g++) {
                 int currentCardNum = playerHandArray[g].getIndexValue();
                 if (currentCardNum == playerNumber) {
@@ -117,8 +182,13 @@ public class Player extends Thread{
         }
     }
 
-
-
+    /**
+     * Sorts hand into sorted arraylist, then from the sorted list finds the most common value in the hand
+     * All other cards,  are set to true to be discarded
+     * If all the cards in the players hand are different (cardNumAmount > 1) then they are all set to be discarded
+     * This function runs if no cards are equal to the player number
+     *
+     */
     public void decideDiscard(){
         Card[] playerHandArray = getPlayerHandArray();
         int[] tempArray = new int[4];
@@ -126,11 +196,10 @@ public class Player extends Thread{
             tempArray[i] = playerHandArray[i].getIndexValue();
         }
         Arrays.sort(tempArray);
-
         int cardNumAmount = 1;
         int tempValue;
         int winingVal = tempArray[0];
-        int count = 0;
+        int count;
         for (int i = 0; i < (tempArray.length); i++) {
             count = 1;
             tempValue = tempArray[i];
@@ -144,9 +213,7 @@ public class Player extends Thread{
                 winingVal = playerHandArray[i].getIndexValue();
                 cardNumAmount = count;
             }
-
         }
-
         if(cardNumAmount > 1 ) {
             for (int i = 0; i < playerHandArray.length; i++) {
                 if (winingVal == playerHandArray[i].getIndexValue()) {
@@ -164,14 +231,20 @@ public class Player extends Thread{
     }
 
 
-
-    //Returns index to which card should be removed from the players hand array
+    /**
+     * Returns the index to which card should be removed from the players hand
+     * If the card has been in the hand for more than 3 turns then it will
+     * get added to the priority index
+     * This will not stagnate the game
+     *
+     * @return          the index for the players hand array
+     */
     public int findDiscardIndex(){
-        ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
-        ArrayList<Integer> removePriorityIndex = new ArrayList<Integer>();
+        ArrayList<Integer> removeIndexes = new ArrayList<>();
+        ArrayList<Integer> removePriorityIndex = new ArrayList<>();
         for (int i = 0; i < playerHandArray.length; i++) {
-            if(playerHandArray[i].getDiscard() == true){
-                if(playerHandArray[i].getTimeStep() > 2){ /// 3 ?
+            if(playerHandArray[i].getDiscard()){
+                if(playerHandArray[i].getTimeStep() > 3){
                     removePriorityIndex.add(i);
                 }else {
                     removeIndexes.add(i);
@@ -179,35 +252,49 @@ public class Player extends Thread{
             }
         }
         Random rand = new Random();
-        int randomIndexToRemove = 0;
-        int index = 0;
-        int removePosition = 0;
+        int index;
         if(removePriorityIndex.size() > 0){
-            randomIndexToRemove = rand.nextInt(removePriorityIndex.size());
-            index = removePriorityIndex.get(randomIndexToRemove);
-            removePosition = removePriorityIndex.indexOf(index);
-            removePriorityIndex.remove(removePosition);
-            for(int j = 0; j < removePriorityIndex.size(); j++) {
-                for(int i = 0; i < playerHandArray.length; i++) {
-                    if(removePriorityIndex.get(j) == i) {
-                        playerHandArray[i].setTimeStep();
-                    }
-                }
-            }
+            index = getIndex(removePriorityIndex, rand);
         }else {
-            randomIndexToRemove = rand.nextInt(removeIndexes.size());
-            index = removeIndexes.get(randomIndexToRemove);
-            removePosition = removeIndexes.indexOf(index);
-            removeIndexes.remove(removePosition);
-            for(int j = 0; j < removeIndexes.size(); j++) {
-                for(int i = 0; i < playerHandArray.length; i++) {
-                    if(removeIndexes.get(j) == i) {
-                        playerHandArray[i].setTimeStep();
-                    }
+            index = getIndex(removeIndexes, rand);
+        }
+        return index;
+    }
+
+
+    /**
+     * Where the card attribute to discard is true in findDiscardIndex
+     * The function gets a random index from the specified list and returns it
+     * Any other card: its (timestep) is increased as it is not discarded this turn
+     *
+     * @param discardIndexList           list of indexes for potential discarded cards
+     * @param rand                       Random variable to get index (if multiple)
+     * @return                           returns the index for the discard card
+     */
+    private int getIndex(ArrayList<Integer> discardIndexList, Random rand) {
+        int randomIndexToRemove;
+        int index;
+        int removePosition;
+        randomIndexToRemove = rand.nextInt(discardIndexList.size());
+        index = discardIndexList.get(randomIndexToRemove);
+        removePosition = discardIndexList.indexOf(index);
+        discardIndexList.remove(removePosition);
+        for (Integer priorityIndex : discardIndexList) {
+            for (int i = 0; i < playerHandArray.length; i++) {
+                if (priorityIndex == i) {
+                    playerHandArray[i].setTimeStep();
                 }
             }
         }
         return index;
     }
 
+    /**
+     * If informed player has lost, will write to file as loser
+     *
+     * @param winningPlayer        the informant winning player
+     */
+    public void writeLosers(int winningPlayer) {
+        Pack.writeLoser(playerNumber, winningPlayer, playerHandArray);
+    }
 }

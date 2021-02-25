@@ -1,0 +1,8 @@
+Player 3 picked up 3 from player 2 and discarded 5 to player 1
+Player 3 picked up 4 from player 2 and discarded 2 to player 1
+Player 3 picked up 4 from player 2 and discarded 4 to player 1
+Player 3 picked up 2 from player 2 and discarded 4 to player 1
+Player 3 picked up 6 from player 2 and discarded 6 to player 1
+Player 3 picked up 6 from player 2 and discarded 6 to player 1
+Player 3 picked up 3 from player 2 and discarded 6 to player 1
+player 1 has informed player 3 they have won. Players final hand: 2 3 3 3 

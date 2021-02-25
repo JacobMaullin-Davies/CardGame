@@ -1,0 +1,17 @@
+Player 2 picked up 1 from player 1 and discarded 4 to player 3
+Player 2 picked up 3 from player 1 and discarded 6 to player 3
+Player 2 picked up 4 from player 1 and discarded 3 to player 3
+Player 2 picked up 6 from player 1 and discarded 5 to player 3
+Player 2 picked up 5 from player 1 and discarded 3 to player 3
+Player 2 picked up 4 from player 1 and discarded 1 to player 3
+Player 2 picked up 2 from player 1 and discarded 6 to player 3
+Player 2 picked up 1 from player 1 and discarded 4 to player 3
+Player 2 picked up 1 from player 1 and discarded 4 to player 3
+Player 2 picked up 2 from player 1 and discarded 1 to player 3
+Player 2 picked up 6 from player 1 and discarded 5 to player 3
+Player 2 picked up 5 from player 1 and discarded 6 to player 3
+Player 2 picked up 6 from player 1 and discarded 5 to player 3
+Player 2 picked up 5 from player 1 and discarded 1 to player 3
+Player 2 picked up 2 from player 1 and discarded 5 to player 3
+Player 2 picked up 6 from player 1 and discarded 6 to player 3
+player 3 has informed player 2 they have won. Players final hand: 6 2 2 2 

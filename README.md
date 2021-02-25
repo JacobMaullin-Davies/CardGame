@@ -31,7 +31,8 @@ and the players end hand is shown.
 After a winner is declared, the decks are appended to an output file as well.
 
 # How code is run 
-To run the jar file change directory to the Cardgame folder.   
+In Ide, running the CardGame.java will allow input in the ide terminal
+Or create a jar file
 Write the following:
    
     java -jar Cards.jar    
